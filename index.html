@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#07070c">
+<title>人生副本 · A LIFE, AND ALL ITS COPIES</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  :root{
+    --gold:#d8b26a;--gold-lt:#f0d9a4;--gold-dk:#8a6c33;
+    --paper:#ece5d6;--muted:#8b8478;
+  }
+  body{
+    background:#07070c;color:var(--paper);overflow:hidden;
+    font-family:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC",serif;
+  }
+
+  /* ============ 背景 ============ */
+  #bg{position:fixed;inset:0;z-index:0}
+  .aurora{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+  .aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5}
+  .aurora i:nth-child(1){width:62vw;height:62vw;left:-18vw;top:-24vw;
+    background:radial-gradient(circle,rgba(92,68,160,.55),transparent 68%);
+    animation:dr1 28s ease-in-out infinite alternate}
+  .aurora i:nth-child(2){width:54vw;height:54vw;right:-16vw;bottom:-22vw;
+    background:radial-gradient(circle,rgba(180,132,60,.40),transparent 68%);
+    animation:dr2 34s ease-in-out infinite alternate}
+  .aurora i:nth-child(3){width:42vw;height:42vw;left:36vw;top:42vh;
+    background:radial-gradient(circle,rgba(46,104,146,.30),transparent 70%);
+    animation:dr1 40s ease-in-out infinite alternate-reverse}
+  @keyframes dr1{from{transform:translate(0,0) scale(1)}to{transform:translate(6vw,5vh) scale(1.15)}}
+  @keyframes dr2{from{transform:translate(0,0) scale(1.1)}to{transform:translate(-7vw,-4vh) scale(.92)}}
+
+  /* ============ 屏幕 ============ */
+  .screen{
+    position:fixed;inset:0;z-index:3;display:flex;flex-direction:column;
+    overflow-y:auto;overflow-x:hidden;
+    opacity:0;visibility:hidden;transition:opacity .6s ease,visibility .6s;
+  }
+  .screen.on{opacity:1;visibility:visible}
+  .wrap{margin:auto;width:100%;max-width:960px;padding:52px 28px}
+
+  /* ============ 封面 ============ */
+  .cover-wrap{margin:auto;width:100%;max-width:840px;padding:48px 26px;text-align:center;position:relative}
+  .ornament{
+    position:absolute;left:50%;top:50%;width:min(118vw,880px);height:min(118vw,880px);
+    transform:translate(-50%,-50%);opacity:.55;pointer-events:none;z-index:-1;
+    animation:spin 180s linear infinite;
+  }
+  @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+  .kicker{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:10px;letter-spacing:.46em;color:#a98f5a;text-transform:uppercase;
+    margin-bottom:40px;animation:up 1.1s .1s both;
+  }
+  .cover-title{
+    font-size:clamp(52px,11vw,108px);letter-spacing:.18em;text-indent:.18em;
+    line-height:1.06;font-weight:400;
+    background:linear-gradient(172deg,#fffaf0 0%,#f3e3bb 30%,#d8b26a 58%,#9c7b3c 82%,#7a5f28 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 80px rgba(216,178,106,.20);
+    animation:up 1.3s .25s both;
+  }
+  .cover-sub{
+    margin-top:22px;font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:clamp(9px,1.6vw,11px);letter-spacing:.52em;color:#8d8064;
+    text-indent:.52em;animation:up 1.3s .4s both;
+  }
+  .rule{
+    width:60px;height:1px;margin:40px auto;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+    animation:up 1.3s .5s both;
+  }
+  .cover-desc{
+    font-size:clamp(14px,2.4vw,16px);line-height:2.3;letter-spacing:.08em;
+    color:#9b9384;animation:up 1.3s .6s both;
+  }
+  .cover-desc b{color:#d8b26a;font-weight:400}
+  .cover-meta{
+    margin-top:46px;font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:10px;letter-spacing:.34em;color:#4e4a42;animation:up 1.3s .95s both;
+  }
+  @keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ============ 按钮 ============ */
+  .btn{
+    position:relative;display:inline-block;overflow:hidden;
+    padding:17px 58px;margin-top:46px;
+    font-family:inherit;font-size:15px;letter-spacing:.36em;text-indent:.36em;
+    color:var(--gold-lt);background:rgba(216,178,106,.045);
+    border:1px solid rgba(216,178,106,.42);border-radius:2px;cursor:pointer;
+    transition:all .45s cubic-bezier(.2,.8,.3,1);
+    animation:up 1.3s .8s both;
+  }
+  .btn::before{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(115deg,transparent 30%,rgba(240,217,164,.30),transparent 70%);
+    transform:translateX(-130%);transition:transform .8s ease;
+  }
+  .btn:hover{
+    color:#fff8e8;border-color:rgba(240,217,164,.9);
+    box-shadow:0 0 40px rgba(216,178,106,.30),inset 0 0 30px rgba(216,178,106,.10);
+    transform:translateY(-2px);
+  }
+  .btn:hover::before{transform:translateX(130%)}
+  .btn:active{transform:translateY(0)}
+
+  /* ============ 游戏 HUD ============ */
+  .hud{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
+  .hud-l{display:flex;align-items:baseline;gap:7px;font-family:"Helvetica Neue",Arial,sans-serif}
+  .hud-num{font-size:22px;letter-spacing:.06em;color:var(--gold);font-weight:300}
+  .hud-total{font-size:11px;letter-spacing:.18em;color:#5c574e}
+  .hud-ch{font-size:12px;letter-spacing:.28em;color:#8a7d5f}
+  .track{height:1px;background:rgba(255,255,255,.07);position:relative;overflow:hidden;margin-bottom:52px}
+  .track i{
+    position:absolute;left:0;top:0;height:100%;width:0;
+    background:linear-gradient(90deg,#7a5f28,#d8b26a,#f0d9a4);
+    box-shadow:0 0 16px rgba(240,217,164,.7);
+    transition:width .6s cubic-bezier(.2,.8,.3,1);
+  }
+
+  /* ============ 题干 ============ */
+  .qcard{display:flex;gap:26px;margin-bottom:46px;align-items:flex-start}
+  .qmark{
+    flex:0 0 auto;font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:12px;letter-spacing:.14em;color:#6b6046;padding-top:11px;position:relative;
+  }
+  .qmark::after{
+    content:"";position:absolute;right:-13px;top:6px;bottom:6px;width:1px;
+    background:linear-gradient(180deg,var(--gold),transparent);opacity:.5;
+  }
+  .qtext{
+    font-size:clamp(21px,3.7vw,31px);line-height:1.72;letter-spacing:.05em;
+    font-weight:400;color:#f2ece0;animation:qin .7s cubic-bezier(.2,.8,.3,1) both;
+  }
+  @keyframes qin{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+  /* ============ 选项 ============ */
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .opt{
+    display:flex;align-items:center;gap:16px;padding:17px 20px;text-align:left;
+    font-family:inherit;font-size:15px;line-height:1.55;letter-spacing:.03em;
+    color:#b5ae9f;background:rgba(255,255,255,.02);
+    border:1px solid rgba(255,255,255,.065);border-radius:3px;
+    cursor:pointer;position:relative;overflow:hidden;
+    transition:all .34s cubic-bezier(.2,.8,.3,1);
+    opacity:0;animation:opin .55s cubic-bezier(.2,.8,.3,1) both;
+  }
+  @keyframes opin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .opt::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold);
+    transform:scaleY(0);transform-origin:center;transition:transform .35s ease;
+  }
+  .oi{
+    flex:0 0 auto;font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:10px;letter-spacing:.14em;color:#57534a;transition:color .3s;
+  }
+  .opt:hover{
+    color:#fff6e4;background:rgba(216,178,106,.075);
+    border-color:rgba(216,178,106,.45);transform:translateX(4px);
+    box-shadow:0 8px 34px rgba(0,0,0,.45),inset 0 0 26px rgba(216,178,106,.05);
+  }
+  .opt:hover::before{transform:scaleY(1)}
+  .opt:hover .oi{color:var(--gold)}
+  .opt.sel{
+    color:#fff8e8;background:rgba(216,178,106,.16);
+    border-color:rgba(240,217,164,.92);
+    box-shadow:0 0 36px rgba(216,178,106,.34),inset 0 0 28px rgba(216,178,106,.14);
+    transform:translateX(4px);
+  }
+  .opt.sel::before{transform:scaleY(1)}
+  .opt.sel .oi{color:#f0d9a4}
+  .opt.fade{opacity:.14 !important;transform:none !important;filter:blur(.4px)}
+  .opt:disabled{cursor:default}
+
+  /* ============ 分支浮层 ============ */
+  .branch{
+    position:fixed;left:50%;bottom:0;z-index:8;width:100%;max-width:680px;
+    padding:22px 30px 26px;
+    background:linear-gradient(180deg,rgba(14,13,20,.94),rgba(9,9,14,.99));
+    border-top:1px solid rgba(216,178,106,.30);border-radius:6px 6px 0 0;
+    backdrop-filter:blur(20px);transform:translate(-50%,115%);
+    transition:transform .6s cubic-bezier(.2,.85,.25,1);
+    box-shadow:0 -20px 60px rgba(0,0,0,.6);
+  }
+  .branch.show{transform:translate(-50%,0)}
+  .branch-label{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:9px;letter-spacing:.42em;color:#8a7748;margin-bottom:12px;text-transform:uppercase;
+  }
+  .branch-text{font-size:15px;line-height:1.8;letter-spacing:.05em;color:#e2d6bc}
+  .branch-text em{font-style:normal;color:#f0d9a4}
+
+  /* ============ 结果页 ============ */
+  .r-head{text-align:center;margin-bottom:52px}
+  .r-id{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:10px;letter-spacing:.4em;color:#6b6046;margin-bottom:26px;
+  }
+  .r-id b{color:var(--gold);font-weight:400;letter-spacing:.22em}
+  .r-title{
+    font-size:clamp(27px,5.4vw,44px);font-weight:400;line-height:1.5;letter-spacing:.08em;
+    background:linear-gradient(172deg,#fffaf0,#f3e3bb 40%,#d8b26a 72%,#a5863f);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .r-sub{margin-top:18px;font-size:13px;letter-spacing:.26em;color:#7d7565}
+
+  .panel{
+    border:1px solid rgba(255,255,255,.055);border-radius:4px;
+    background:rgba(255,255,255,.014);padding:34px 30px;margin-bottom:34px;
+  }
+  .panel-label{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:9px;letter-spacing:.42em;color:#8a7748;margin-bottom:26px;text-transform:uppercase;
+  }
+  .radar-box{display:flex;justify-content:center;margin-bottom:26px}
+  .radar{width:100%;max-width:340px;height:auto;overflow:visible}
+
+  .dims{display:flex;flex-direction:column;gap:13px;margin-top:8px}
+  .dim{display:flex;align-items:center;gap:14px}
+  .dim-name{flex:0 0 46px;text-align:right;font-size:12.5px;letter-spacing:.14em;color:#9a9284}
+  .dim-track{flex:1;height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+  .dim-track i{display:block;height:100%;width:0;border-radius:2px;transition:width 1.4s cubic-bezier(.2,.85,.25,1)}
+  .dim-val{flex:0 0 30px;font-family:"Helvetica Neue",Arial,sans-serif;font-size:11px;color:#615c53}
+
+  .alt-list{display:flex;flex-direction:column;gap:11px}
+  .alt{
+    padding:19px 22px;border-radius:3px;background:rgba(255,255,255,.016);
+    border:1px solid rgba(255,255,255,.05);border-left:2px solid rgba(216,178,106,.30);
+    transition:all .4s;
+  }
+  .alt:hover{background:rgba(216,178,106,.04);border-left-color:rgba(216,178,106,.85)}
+  .alt-q{font-size:12.5px;line-height:1.7;color:#7b7466;letter-spacing:.05em;margin-bottom:12px}
+  .alt-row{display:flex;gap:12px;font-size:14px;line-height:1.85;letter-spacing:.03em}
+  .alt-tag{
+    flex:0 0 66px;font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:9px;letter-spacing:.2em;color:#57534a;padding-top:5px;
+  }
+  .alt-a{color:#a39c8e}
+  .alt-b{color:#e8d3a3}
+
+  .letter{border-left:1px solid rgba(216,178,106,.26);padding:4px 0 4px 30px;margin:0 0 52px}
+  .letter p{font-size:15.5px;line-height:2.35;letter-spacing:.045em;color:#c2baac;margin-bottom:24px}
+  .letter p:last-of-type{margin-bottom:0}
+  .letter em{font-style:normal;color:#eedaab}
+  .letter .strong{color:#f3e6c8}
+  .sign{text-align:right;font-size:12.5px;letter-spacing:.24em;color:#7a6a44;margin-top:36px}
+
+  /* 截图引导 */
+  .share{
+    border:1px solid rgba(216,178,106,.24);border-radius:5px;
+    background:linear-gradient(180deg,rgba(216,178,106,.055),rgba(216,178,106,.012));
+    padding:34px 28px;margin-bottom:34px;text-align:center;
+  }
+  .share-label{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:9px;letter-spacing:.42em;color:#8a7748;margin-bottom:20px;text-transform:uppercase;
+  }
+  .share p{font-size:14.5px;line-height:2;letter-spacing:.06em;color:#b8b0a2;margin-bottom:24px}
+  .share p b{color:#eedaab;font-weight:400}
+  .share-card{
+    display:inline-block;min-width:230px;padding:22px 34px;margin-bottom:24px;
+    border:1px solid rgba(216,178,106,.45);border-radius:4px;
+    background:rgba(8,8,14,.55);
+    box-shadow:0 0 40px rgba(216,178,106,.12) inset;
+  }
+  .sc-id{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:10px;letter-spacing:.38em;color:#8a7748;margin-bottom:12px;
+  }
+  .sc-title{font-size:16px;letter-spacing:.1em;color:#f0d9a4}
+  .copy-btn{
+    display:inline-block;padding:13px 34px;
+    font-family:inherit;font-size:13px;letter-spacing:.24em;text-indent:.24em;
+    color:#e8d3a3;background:rgba(216,178,106,.06);
+    border:1px solid rgba(216,178,106,.45);border-radius:2px;cursor:pointer;
+    transition:all .4s;
+  }
+  .copy-btn:hover{color:#fff8e8;border-color:rgba(240,217,164,.9);background:rgba(216,178,106,.14)}
+  .copy-tip{margin-top:14px;font-size:11px;letter-spacing:.2em;color:#6b6046;min-height:16px}
+
+  .r-btn{display:block;margin:0 auto 34px;animation:none}
+
+  /* 滚动条 */
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(216,178,106,.20);border-radius:4px}
+
+  /* ============ 响应式 ============ */
+  @media (max-width:760px){
+    .wrap{padding:36px 20px}
+    .cover-wrap{padding:36px 20px}
+    .opts{grid-template-columns:1fr;gap:9px}
+    .opt{padding:14px 16px;font-size:14.5px;gap:13px}
+    .qcard{gap:20px;margin-bottom:32px}
+    .qtext{font-size:20px;line-height:1.68}
+    .track{margin-bottom:36px}
+    .hud-num{font-size:19px}
+    .panel{padding:26px 18px}
+    .letter{padding-left:20px;margin-bottom:42px}
+    .letter p{font-size:14.5px;line-height:2.25;margin-bottom:20px}
+    .branch{padding:18px 22px 22px}
+    .branch-text{font-size:14px}
+    .alt-tag{flex:0 0 58px}
+    .dim-name{flex:0 0 42px;font-size:11.5px}
+    .share{padding:28px 18px}
+  }
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="aurora"><i></i><i></i><i></i></div>
+
+<!-- ================= 封面 ================= -->
+<section class="screen on" id="coverScreen">
+  <div class="cover-wrap">
+    <svg class="ornament" viewBox="0 0 800 800" fill="none">
+      <circle cx="400" cy="400" r="336" stroke="rgba(216,178,106,.10)" stroke-width="1"/>
+      <circle cx="400" cy="400" r="286" stroke="rgba(216,178,106,.06)" stroke-width="1" stroke-dasharray="2 7"/>
+      <circle cx="400" cy="400" r="236" stroke="rgba(216,178,106,.08)" stroke-width="1"/>
+      <circle cx="400" cy="400" r="176" stroke="rgba(216,178,106,.055)" stroke-width="1" stroke-dasharray="1 6"/>
+      <circle cx="400" cy="400" r="112" stroke="rgba(216,178,106,.05)" stroke-width="1"/>
+      <g stroke="rgba(216,178,106,.13)" stroke-width="1">
+        <line x1="400" y1="58" x2="400" y2="128"/>
+        <line x1="400" y1="672" x2="400" y2="742"/>
+        <line x1="58" y1="400" x2="128" y2="400"/>
+        <line x1="672" y1="400" x2="742" y2="400"/>
+        <line x1="158" y1="158" x2="207" y2="207"/>
+        <line x1="593" y1="593" x2="642" y2="642"/>
+        <line x1="642" y1="158" x2="593" y2="207"/>
+        <line x1="207" y1="593" x2="158" y2="642"/>
+      </g>
+      <g fill="rgba(216,178,106,.55)">
+        <circle cx="400" cy="68" r="2.4"/><circle cx="400" cy="732" r="2.4"/>
+        <circle cx="68" cy="400" r="2.4"/><circle cx="732" cy="400" r="2.4"/>
+        <circle cx="166" cy="166" r="1.8"/><circle cx="634" cy="634" r="1.8"/>
+        <circle cx="634" cy="166" r="1.8"/><circle cx="166" cy="634" r="1.8"/>
+      </g>
+      <circle cx="400" cy="64" r="4" fill="rgba(240,217,164,.75)"/>
+    </svg>
+
+    <p class="kicker">Stanford Life Design · Interactive Edition</p>
+    <h1 class="cover-title">人生副本</h1>
+    <p class="cover-sub">A LIFE, AND ALL ITS COPIES</p>
+    <div class="rule"></div>
+    <p class="cover-desc">
+      五十个人生路口，四百种选择。<br>
+      每一次按下，都会长出一个<b>新的副本</b>。<br>
+      你会在这里看见——<br>
+      自己是怎么一步一步，成为自己的。
+    </p>
+    <button class="btn" id="startBtn">进入副本</button>
+    <p class="cover-meta">50 个路口 · 每路口 8 种选择 · 1 次重启</p>
+  </div>
+</section>
+
+<!-- ================= 游戏 ================= -->
+<section class="screen" id="gameScreen">
+  <div class="wrap">
+    <div class="hud">
+      <div class="hud-l">
+        <span class="hud-num" id="hudNum">01</span>
+        <span class="hud-total">/ 50</span>
+      </div>
+      <div class="hud-ch" id="hudCh">序章 · 启程</div>
+    </div>
+    <div class="track"><i id="trackFill"></i></div>
+
+    <div class="qcard">
+      <div class="qmark" id="qMark">01</div>
+      <h2 class="qtext" id="qText"></h2>
+    </div>
+
+    <div class="opts" id="opts"></div>
+  </div>
+</section>
+
+<!-- ================= 分支浮层 ================= -->
+<div class="branch" id="branch">
+  <div class="branch-label">在另一个副本里</div>
+  <div class="branch-text" id="branchText"></div>
+</div>
+
+<!-- ================= 结果 ================= -->
+<section class="screen" id="resultScreen">
+  <div class="wrap" id="resultWrap"></div>
+</section>
+
+<script>
+/* =========================================================
+   0. 维度定义
+   ========================================================= */
+const DIMS = [
+  {k:'c', n:'勇气', color:'#e2574c'},
+  {k:'w', n:'智慧', color:'#4fb0c6'},
+  {k:'r', n:'连接', color:'#d96a9a'},
+  {k:'h', n:'健康', color:'#7bbf6a'},
+  {k:'k', n:'创造', color:'#e0b74a'},
+  {k:'m', n:'丰盛', color:'#c98a4b'},
+  {k:'n', n:'意义', color:'#8f7ee0'},
+  {k:'f', n:'自由', color:'#4a8fd4'}
+];
+
+/* =========================================================
+   1. 50 个路口 · 每个路口 8 种选择
+   格式：[选项文字, 维度影响]
+   ========================================================= */
+const QS = [
+/* ---------- 序章 · 启程 ---------- */
+{t:'六岁那年，大人们笑着问你：「长大以后想做什么呀？」',o:[
+  ['大声说出了一个梦想','c3'],
+  ['说「不知道」，然后真的开始想','w3'],
+  ['说了一个大人爱听的答案','m2w1'],
+  ['说「想和爸爸妈妈一样」','r3'],
+  ['说「想造一个会飞的东西」','k3'],
+  ['说「想去看海」','f3'],
+  ['说「想帮到别人」','n3'],
+  ['低下头，什么也没说','h2w1']
+]},
+{t:'十岁的暑假，漫长得像一整个世纪。',o:[
+  ['泡在图书馆里','w3'],
+  ['在楼下踢球到天黑','h2r1'],
+  ['一个人骑车去很远的地方','f3'],
+  ['报了个画画班','k3'],
+  ['帮邻居奶奶干活','n2r1'],
+  ['学会了做一桌菜','h2k1'],
+  ['打了一整个夏天的游戏','k1f2'],
+  ['跟着父母去了一趟远方','r2f1']
+]},
+{t:'十五岁，你的成绩中等，不上不下。',o:[
+  ['熬夜补课，往上冲','c3w1'],
+  ['接受自己，专心做喜欢的事','n2f1'],
+  ['开始偷偷写东西','k3'],
+  ['组了个乐队，或者球队','r2k1'],
+  ['周末去打工','m3'],
+  ['和父母大吵了一架','c2r1'],
+  ['一个人去跑步','h3'],
+  ['开始想「我到底是谁」','w2n1']
+]},
+{t:'十七岁，文理分科的最后一天。',o:[
+  ['选理科，因为好就业','m3'],
+  ['选文科，因为喜欢','n2k1'],
+  ['听老师的','w2m1'],
+  ['听父母的','r2h1'],
+  ['选最难的那个','c3'],
+  ['选最轻松的那个','h2f1'],
+  ['哪个都不选，去准备艺考','k3c1'],
+  ['认真做了三个月调研','w3']
+]},
+{t:'十八岁，高考志愿填报的最后一个下午。',o:[
+  ['冲梦想中的学校，滑档也认','c3'],
+  ['稳妥选一所本地大学','h2r1'],
+  ['报一个冷门但心动的专业','n3'],
+  ['报金融','m3'],
+  ['报艺术院校，赌上热爱','k3c1'],
+  ['读师范，安稳又有意义','n2m1'],
+  ['选中外合办，去看看世界','f3'],
+  ['不填了，休学一年想清楚','f3c1']
+]},
+{t:'大学第一周，社团招新摆满了整条路。',o:[
+  ['进学生会，练人情世故','m2w1'],
+  ['进辩论社，磨嘴皮子','w3'],
+  ['组乐队，把热爱大声弹出来','k3c1'],
+  ['进志愿者协会，去帮人','n3r1'],
+  ['进创业社团，先学着赚钱','m2k1'],
+  ['进摄影社，一个人看风景','k2f2'],
+  ['谁也不加入，天天泡图书馆','w3h1'],
+  ['自己拉了一个小圈子','r3c1']
+]},
+{t:'大二，一次海外交换的机会，只有两个名额。',o:[
+  ['去，家里砸锅卖铁也支持','c2f1'],
+  ['不去，把名额让别人','n3'],
+  ['去，但自己打工挣生活费','m2c1'],
+  ['不去，留下来做项目','w2k1'],
+  ['去，一个人也不认识','f3'],
+  ['不去，留下来陪生病的家人','r3'],
+  ['去，顺便把想看的都看了','f2k1'],
+  ['犹豫到截止日，错过了','w2h1']
+]},
+{t:'大三，有一份很想要的实习，但要翘课。',o:[
+  ['翘课去大厂实习','m3'],
+  ['老老实实上课，绩点最重要','w3'],
+  ['用翘课的时间做自己的项目','k3'],
+  ['逃课去旅行，看看外面的世界','f3'],
+  ['翘课去陪生病的室友','r3'],
+  ['一边上课一边打三份工','m2c1'],
+  ['泡在实验室做研究','w2n1'],
+  ['什么都不做，睡到自然醒','h2f1']
+]},
+{t:'毕业。宿舍楼下的行李箱，摆了一排。',o:[
+  ['考研，继续读下去','w3'],
+  ['出国，去看看更远的地方','f2w1'],
+  ['进大厂，先把钱赚了','m3'],
+  ['考公，图个安稳','h2m1'],
+  ['去小公司，能做更多事','c2k1'],
+  ['自己创业，趁年轻','c3'],
+  ['gap 一年，先想清楚要什么','f3n1'],
+  ['回老家，陪在父母身边','r3']
+]},
+{t:'第一份 offer，你更看重什么？',o:[
+  ['薪水高，996 也认','m3'],
+  ['钱少一点，但做的事我喜欢','n2k1'],
+  ['平台大，能学到东西','w3'],
+  ['同事好，氛围舒服','r3'],
+  ['老板是牛人，跟着他干','w2m1'],
+  ['离家近，能天天回家吃饭','h2r1'],
+  ['能出差，能到处跑','f3'],
+  ['能自己做主，不被管','f2c1']
+]},
+
+/* ---------- 第一章 · 入世 ---------- */
+{t:'第一笔工资到账。你打算——',o:[
+  ['全部存起来','m2h1'],
+  ['给爸妈买件礼物','r3'],
+  ['请朋友们吃一顿','r2f1'],
+  ['买一件一直想要的东西','k2h1'],
+  ['报一门课，投资自己','w3'],
+  ['拿去投资','m3'],
+  ['买张票，说走就走','f3'],
+  ['捐一部分出去','n3']
+]},
+{t:'你第一次真正心动。',o:[
+  ['直接表白，不留遗憾','c3'],
+  ['慢慢来，先做朋友','w2r1'],
+  ['默默喜欢，不说','w1n1'],
+  ['先专注自己，爱情以后再说','w2m1'],
+  ['写了一封信给对方','k2r1'],
+  ['拉上朋友壮胆去追','r3'],
+  ['放手，祝对方好','n2r1'],
+  ['跟着感觉走，不管结果','c2f1']
+]},
+{t:'租房，还是买房？',o:[
+  ['咬牙买，背上三十年贷款','m2h1'],
+  ['一直租，保持灵活','f3'],
+  ['和朋友合租一个大房子','r3'],
+  ['买个小房子，够住就好','h2m1'],
+  ['搬到城市另一端，换个环境','c2f1'],
+  ['和父母一起住，攒钱','m2r1'],
+  ['买了再租出去','m3'],
+  ['干脆住进房车或青旅','f3k1']
+]},
+{t:'工作三年，有个跳槽的机会摆在面前。',o:[
+  ['跳，工资翻倍','m3'],
+  ['不跳，等公司升职','w2m1'],
+  ['跳到完全不相干的行业','c3'],
+  ['辞职去读书','w2f1'],
+  ['留在原地，把一件事做到极致','w2n1'],
+  ['跳去小团队，赌一把','m2c1'],
+  ['跳去能多陪家人的地方','r3'],
+  ['不跳，边上班边做副业','m2k1']
+]},
+{t:'同事被冤枉了，只有你知道真相。',o:[
+  ['站出来，把真相说出来','c3n1'],
+  ['私下悄悄告诉当事人','r2w1'],
+  ['装不知道，明哲保身','w2h1'],
+  ['匿名举报','w2n1'],
+  ['帮同事一起找证据','r3c1'],
+  ['心里记下这件事，什么也不做','h1w1'],
+  ['第二天就辞职','f3c1'],
+  ['把问题直接捅到老板那里','w2m1']
+]},
+{t:'多年的朋友开口向你借钱。',o:[
+  ['二话不说就借','r3'],
+  ['借一半，留个余地','r2w1'],
+  ['拒绝，但把原因说清楚','w2h1'],
+  ['不借，还劝他别做这件事','w2n1'],
+  ['不借钱，陪他一起想办法','r2k1'],
+  ['借，但写好借条','w2m1'],
+  ['直接给他，不用还','n3r1'],
+  ['从此不再联系','f2h1']
+]},
+{t:'你们要异地了。',o:[
+  ['为了对方，换一座城市','r3c1'],
+  ['异地，两个人一起扛','r2w1'],
+  ['各自努力，先分开','w2f1'],
+  ['直接结婚，把距离解决掉','c3r1'],
+  ['一起出国','f2r1'],
+  ['分手，各自安好','n2w1'],
+  ['先做自己，感情随缘','f2h1'],
+  ['每周见一次，坚持了很多年','r3w1']
+]},
+{t:'某个周五的深夜，你突然很想走。',o:[
+  ['买张票就走','c3f1'],
+  ['先规划好，下周出发','w2h1'],
+  ['拉上一群朋友一起','r3'],
+  ['一个人去，谁也不告诉','f3'],
+  ['去当志愿者','n3'],
+  ['边打工边旅行','k2f1m1'],
+  ['不去，把钱存下来','m3'],
+  ['去了，但很快就回来了','w1h1']
+]},
+{t:'过年回家，父母又开始催婚。',o:[
+  ['顺着他们，去相亲','r2m1'],
+  ['坦白说，我有自己的想法','c3w1'],
+  ['带一个人回家交差','k2r1'],
+  ['搬出去住','f3'],
+  ['好好聊一次，让他们理解','w2r2'],
+  ['拖着，不回应','w1h1'],
+  ['干脆出国','f2c1'],
+  ['认真谈一场恋爱','r3']
+]},
+{t:'关于婚姻。',o:[
+  ['结，和爱的人','r3'],
+  ['不结，一个人也很好','f3'],
+  ['不结婚，但一起生活','f2r1'],
+  ['结了，门当户对','m2h1'],
+  ['办一场小小的婚礼','k2r1'],
+  ['等一等，先把事业做起来','w2m1'],
+  ['结，哪怕全世界反对','c3'],
+  ['不着急，先看看再说','w2f1']
+]},
+
+/* ---------- 第二章 · 跋涉 ---------- */
+{t:'关于孩子。',o:[
+  ['要，越早越好','r2h1'],
+  ['要，等准备好再说','w2r1'],
+  ['不要，把爱给别的地方','n3'],
+  ['领养一个孩子','n3r1'],
+  ['要两个，热闹','r2m1'],
+  ['先养一只猫','k2h1'],
+  ['不确定，随缘','w1f1'],
+  ['不要，专心做自己的事','f3k1']
+]},
+{t:'一个创业机会找上门。',o:[
+  ['全押上，赌一把','c3'],
+  ['先兼职试水','w2m1'],
+  ['拉朋友一起干','r2c1'],
+  ['放弃，继续上班','h2m1'],
+  ['只投钱，不参与经营','m3'],
+  ['借钱也要做','c2m1'],
+  ['做一个小而美的生意','k3'],
+  ['把机会让给别人','n3']
+]},
+{t:'老板给你升职，但要外派三年。',o:[
+  ['去，机会难得','m2c1'],
+  ['不去，家在这里','r3h1'],
+  ['去两年，然后回来','w2m1'],
+  ['带着家人一起去','r2c1'],
+  ['拒绝，换一个更喜欢的岗位','f2n1'],
+  ['去，然后留在那里','f3c1'],
+  ['不去，辞职去旅行','f3'],
+  ['去，把这段经历写下来','k2w1']
+]},
+{t:'体检报告上，出现了几个异常指标。',o:[
+  ['立刻停下来，休息','h3'],
+  ['调整作息，继续工作','h2w1'],
+  ['辞职','h2f2'],
+  ['开始运动','h3c1'],
+  ['去看医生，认真治','h2w1'],
+  ['不管它，先扛过去','m2c1'],
+  ['换一份轻松点的工作','h2n1'],
+  ['用一年时间调养','h3w1']
+]},
+{t:'老同学聚会，十年没见了。',o:[
+  ['好好叙旧，聊到很晚','r3'],
+  ['聊到深夜，还去唱了歌','r2k1'],
+  ['发现已经聊不到一起了','w2n1'],
+  ['主动组个局，把人都叫上','r3c1'],
+  ['坐一会儿就走了','f2h1'],
+  ['把当年没说的事都说了','c2n1'],
+  ['交换联系方式，重新联系','r2m1'],
+  ['举杯，然后各自散场','f2n1']
+]},
+{t:'人生第一辆车。',o:[
+  ['买喜欢的，哪怕贵','k2c1'],
+  ['买便宜的代步','m2h1'],
+  ['买二手，划算','m2w1'],
+  ['不买，坐地铁挺好','h2m1'],
+  ['买一辆能带家人出游的','r3'],
+  ['买电动车，环保','n2h1'],
+  ['改装成自己喜欢的样子','k3'],
+  ['把钱拿去做别的','m2f1']
+]},
+{t:'一个投资机会，据说回报很高。',o:[
+  ['全仓，机会难得','c3'],
+  ['投一部分试试','m2w1'],
+  ['仔细研究之后再决定','w3'],
+  ['不投，钱放银行','h2m1'],
+  ['跟朋友一起投','r2m1'],
+  ['投给一个年轻创业者','n2k1'],
+  ['拿去学一门手艺','k2w1'],
+  ['拿去旅行','f3']
+]},
+{t:'亲人重病住院。',o:[
+  ['辞职照顾','r3n1'],
+  ['请长假，两边兼顾','r2h1'],
+  ['花钱请最好的医生','m2n1'],
+  ['陪在身边，每天说话','r3'],
+  ['把工作带回家做','w2r1'],
+  ['四处求医问药','c2n1'],
+  ['把这段时间记录下来','k2n1'],
+  ['把眼泪藏起来，扛住','c2h1']
+]},
+{t:'公司裁员，名单里有你。',o:[
+  ['第二天就开始投简历','w2m1'],
+  ['先休息一个月再说','h2f1'],
+  ['趁机转行','c3'],
+  ['回老家待一阵','r2h1'],
+  ['拿着赔偿金去旅行','f3'],
+  ['自己开个小店','k2m1'],
+  ['和前同事一起创业','c2r1'],
+  ['去读书','w3']
+]},
+{t:'三十岁生日。',o:[
+  ['大办一场，把人都请来','r3'],
+  ['一个人去旅行','f3'],
+  ['写下未来十年的计划','w2n1'],
+  ['和家人吃一顿饭','r2h1'],
+  ['开始健身','h3'],
+  ['辞职','c3'],
+  ['买一件一直想要的东西','m2k1'],
+  ['什么都不做，早睡','h2w1']
+]},
+
+/* ---------- 第三章 · 转场 ---------- */
+{t:'你想转行。',o:[
+  ['转，从头开始','c3'],
+  ['边工作边学','w2m1'],
+  ['不转，把现在做到最好','w2n1'],
+  ['转到相关领域','w2k1'],
+  ['转去做公益','n3'],
+  ['转做自由职业','f3'],
+  ['转去创业','c2m1'],
+  ['转去教书','n2r1']
+]},
+{t:'要不要再读个书？',o:[
+  ['辞职去读','w3c1'],
+  ['在职读','w2h1'],
+  ['不读，在实践中学习','w2c1'],
+  ['出国读','f2w1'],
+  ['读个短期课程','k2w1'],
+  ['把学费拿去创业','c2m1'],
+  ['把学费拿去旅行','f3'],
+  ['把钱给家人','r3']
+]},
+{t:'关于孩子的教育。',o:[
+  ['严格，把最好的都安排上','m2w1'],
+  ['放养，让他自己长','f2k1'],
+  ['陪他一起做他喜欢的事','r3k1'],
+  ['送出国','f2m1'],
+  ['教他做人最重要','n3'],
+  ['给他一个快乐的童年','h2r1'],
+  ['尊重他的选择，哪怕不理解','r2w1'],
+  ['让他吃点苦，早点独立','c2w1']
+]},
+{t:'婚姻进入疲惫期。',o:[
+  ['认真谈一次','r3w1'],
+  ['一起去旅行','r2f1'],
+  ['各自留出空间','h2f1'],
+  ['找咨询师','w2r1'],
+  ['分开一段时间','f2w1'],
+  ['为了孩子忍着','r2h1'],
+  ['离婚，重新开始','c3f1'],
+  ['重新追一次对方','k2r1']
+]},
+{t:'街头偶遇旧爱。',o:[
+  ['好好聊一晚','r2c1'],
+  ['留个联系方式','r2m1'],
+  ['礼貌告别','w2h1'],
+  ['装作没看见','w2f1'],
+  ['把当年的遗憾说出来','c2n1'],
+  ['一起吃了顿饭','r2k1'],
+  ['转身就走，回家抱紧身边的人','r3'],
+  ['发了一条很长的消息','k2n1']
+]},
+{t:'父母老了。',o:[
+  ['接来一起住','r3'],
+  ['常回家看看','r2h1'],
+  ['请人照顾','m2r1'],
+  ['搬回老家','r2h1f1'],
+  ['带他们去旅行','r2f1'],
+  ['教他们用手机、拍视频','k2r1'],
+  ['把他们的故事写下来','k2n2'],
+  ['多打电话','r2w1']
+]},
+{t:'朋友创业，拉你入伙。',o:[
+  ['一起干','c3r1'],
+  ['投点钱，不参与','m2r1'],
+  ['婉拒，但帮忙介绍资源','r2w1'],
+  ['拒绝，保持距离','w2h1'],
+  ['先兼职帮帮忙','w2k1'],
+  ['全情投入','c2k1'],
+  ['劝他再想想','w2n1'],
+  ['支持他，但不投钱','r2n1']
+]},
+{t:'一个公益项目邀请你加入。',o:[
+  ['去，做一年','n3'],
+  ['捐一笔钱','n2m1'],
+  ['周末去做志愿者','n2r1'],
+  ['自己发起一个项目','c2k1n1'],
+  ['不去，先顾好自己','h2m1'],
+  ['拉上朋友一起去','r2n1'],
+  ['把它做成事业','n2m1'],
+  ['写下来，让更多人知道','k2n1']
+]},
+{t:'身体发出了更严重的信号。',o:[
+  ['认真治疗，彻底停下来','h3'],
+  ['一边治一边工作','h2m1'],
+  ['改变生活方式','h3c1'],
+  ['开始冥想','h2w1'],
+  ['把想做的事赶紧做完','c2n1'],
+  ['多陪家人','r3'],
+  ['去做一次长途旅行','f2h1'],
+  ['告诉自己没事','w1c1']
+]},
+{t:'要不要换一套房子？',o:[
+  ['换大的','m2r1'],
+  ['换成小的，轻松点','h2f1'],
+  ['搬到喜欢的城市','f2c1'],
+  ['不换，把钱留给孩子','r2m1'],
+  ['换成带院子的','k2h1'],
+  ['换成离父母近的','r3'],
+  ['不换，把钱拿去投资','m3'],
+  ['不换，把钱拿去旅行','f3']
+]},
+
+/* ---------- 终章 · 回望 ---------- */
+{t:'你被误解了。',o:[
+  ['当面说清楚','c3'],
+  ['写下来，把事情澄清','w2k1'],
+  ['沉默，让时间证明','w2h1'],
+  ['离开这个圈子','f2c1'],
+  ['找信任的人倾诉','r2h1'],
+  ['用行动证明','w2c1'],
+  ['反过来去理解对方','n2w1'],
+  ['一笑了之','h2f1']
+]},
+{t:'旅途中，你遇到一个人。',o:[
+  ['留下来多待几天','c2f1'],
+  ['交换联系方式','r2f1'],
+  ['一起走完剩下的路','r2k1'],
+  ['各自离开，把对方记在心里','n2k1'],
+  ['改变行程，跟着对方走','c3'],
+  ['什么都没说','w2h1'],
+  ['写成一篇文章','k2n1'],
+  ['后来去找过对方','r2c1']
+]},
+{t:'你想辞职去追一个梦。',o:[
+  ['辞，全力去追','c3'],
+  ['不辞，业余做','w2k1'],
+  ['辞，给自己一年时间','c2f1'],
+  ['辞，但先存够钱','w2m1'],
+  ['不辞，把梦换成别的','w2h1'],
+  ['辞，搬去另一座城市','c2f1'],
+  ['辞，把过程记录下来','k2n1'],
+  ['不辞，把工作变成梦','w2n1']
+]},
+{t:'中年，你开始想转型。',o:[
+  ['彻底转行','c3'],
+  ['去教书','n2r1'],
+  ['自己做点小生意','k2m1'],
+  ['留在原地，稳住','h2m1'],
+  ['去学一门新手艺','k2w1'],
+  ['去做公益','n3'],
+  ['提前退休','h2f1'],
+  ['去旅行一年','f3']
+]},
+{t:'孩子到了青春期。',o:[
+  ['严格管教','w2m1'],
+  ['放他自由','f2r1'],
+  ['好好谈一次','r3w1'],
+  ['陪他一起犯错','r2c1'],
+  ['给他写信','k2r1'],
+  ['送他去远方','w1f1'],
+  ['自己先做榜样','w2n1'],
+  ['学着放手','n2h1']
+]},
+{t:'父亲走了。',o:[
+  ['大哭一场','r2h1'],
+  ['把该做的事一件件做完','w2c1'],
+  ['把他的故事讲给下一代','k2n1'],
+  ['一个人去旅行','f2h1'],
+  ['陪在母亲身边','r3'],
+  ['继续工作，不让自己停下来','m2c1'],
+  ['开始写日记','k2n1'],
+  ['去做他一直想做却没做的事','n3c1']
+]},
+{t:'你生了一场重病。',o:[
+  ['停下来，认真活着','h3n1'],
+  ['把想说的话都说出来','r3'],
+  ['去完成一个心愿','k2c1'],
+  ['多陪家人','r3'],
+  ['写下自己的一生','k2n1'],
+  ['继续工作','m2c1'],
+  ['去旅行','f2h1'],
+  ['去帮别人','n3']
+]},
+{t:'一位老友离开了。',o:[
+  ['去送他最后一程','r3'],
+  ['一个人待着','h2n1'],
+  ['写下你们的故事','k3n1'],
+  ['联系所有老朋友','r3'],
+  ['替他完成一件事','n3c1'],
+  ['开始珍惜每一天','h2n1'],
+  ['去旅行','f2n1'],
+  ['把他的家人当成自己的家人','r3n1']
+]},
+{t:'五十岁生日。',o:[
+  ['大办一场','r3'],
+  ['一个人去旅行','f3'],
+  ['写下后半生的清单','w2n1'],
+  ['开始学一件一直想学的事','k3'],
+  ['把时间给家人','r3'],
+  ['把经验传给年轻人','n2r1'],
+  ['开始锻炼','h3'],
+  ['辞职','c3']
+]},
+{t:'生命的最后一天。',o:[
+  ['和家人在一起','r3'],
+  ['一个人看日出','n2f1'],
+  ['把想说的话说完','k2r1'],
+  ['像平常一样过','h2n1'],
+  ['去见一个老朋友','r2c1'],
+  ['做一件一直没做的事','c3'],
+  ['把一切都放下','w2n1'],
+  ['唱歌，笑，跳舞','k2h1']
+]}
+];
+
+/* =========================================================
+   2. 章节
+   ========================================================= */
+const CHAPTERS = [
+  {to:9,  name:'序章 · 启程'},
+  {to:19, name:'第一章 · 入世'},
+  {to:29, name:'第二章 · 跋涉'},
+  {to:39, name:'第三章 · 转场'},
+  {to:49, name:'终章 · 回望'}
+];
+function chapterOf(i){
+  return (CHAPTERS.find(c => i <= c.to) || CHAPTERS[CHAPTERS.length-1]).name;
+}
+
+/* =========================================================
+   3. 称号与长信文案
+   ========================================================= */
+const TITLES = {
+  c:{t:'你是自己人生的主角',
+     l:'在那些所有人都说「算了」的岔路口，你总是选了更难的那一条。你未必每次都赢，但你从没糊弄过自己。'},
+  w:{t:'你把很多事情想明白了',
+     l:'你很少被情绪推着走。你更愿意先想清楚，再往前走。那些看起来绕远的路，最后都变成了你的底气。'},
+  r:{t:'你被很多人深深地爱着',
+     l:'你生命里最亮的部分，几乎都和别人有关。你记得很多人的名字、喜好，和那些没说出口的难处。'},
+  h:{t:'你把自己照顾得很好',
+     l:'你没有把身体当成消耗品。你懂得停下来，也懂得重新开始。这件事，很多人一辈子都没学会。'},
+  k:{t:'你留下了属于自己的东西',
+     l:'你一直在做东西。哪怕没有人看见，哪怕没有人鼓掌，你还是愿意做。因为做的时候，你才是你。'},
+  m:{t:'你把日子过成了想要的样子',
+     l:'你相信日子是可以被经营出来的，于是你真的把它经营出来了。你不羞于谈钱，也不被钱牵着走。'},
+  n:{t:'你的存在，让别人好过了一点',
+     l:'你总在问自己：这件事，除了我，还能对谁有用。所以你走过的路上，留下了一些别人受用的痕迹。'},
+  f:{t:'你去了很多地方，也走到了自己心里',
+     l:'你不太愿意被安排好。你更愿意自己去看一眼，哪怕那一眼要付出代价。'}
+};
+const SECOND = {
+  c:'而支撑你走下来的，是那份不肯将就的勇气。',
+  w:'而让你走到这里的，是你一直没停下的思考。',
+  r:'而你之所以能撑住，是因为身边一直有人。',
+  h:'而这一切的前提，是你还有力气去爱、去生活。',
+  k:'而你留在世界上的那些东西，会替你继续说话。',
+  m:'而你攒下的那些余裕，让你在关键时刻有得选。',
+  n:'而你做的那些「不划算」的事，悄悄改变了什么。',
+  f:'而你心里始终有一块地方，是谁也管不着的。'
+};
+
+/* =========================================================
+   4. 星空背景
+   ========================================================= */
+(function(){
+  const cv = document.getElementById('bg');
+  const ctx = cv.getContext('2d');
+  let stars = [];
+
+  function resize(){
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = innerWidth * dpr;
+    cv.height = innerHeight * dpr;
+    cv.style.width = innerWidth + 'px';
+    cv.style.height = innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const n = Math.min(260, Math.floor(innerWidth * innerHeight / 7600));
+    stars = Array.from({length:n}, () => ({
+      x: Math.random() * innerWidth,
+      y: Math.random() * innerHeight,
+      r: Math.random() * 1.25 + 0.22,
+      a: Math.random() * Math.PI * 2,
+      s: Math.random() * 0.016 + 0.004,
+      v: Math.random() * 0.15 + 0.02
+    }));
+  }
+
+  function loop(){
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    for(const st of stars){
+      st.a += st.s;
+      st.y -= st.v;
+      if(st.y < -8){ st.y = innerHeight + 8; st.x = Math.random() * innerWidth; }
+      const alpha = 0.14 + Math.abs(Math.sin(st.a)) * 0.62;
+      ctx.beginPath();
+      ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(234,226,208,' + alpha.toFixed(3) + ')';
+      ctx.fill();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  resize();
+  addEventListener('resize', resize);
+  loop();
+})();
+
+/* =========================================================
+   5. 工具函数
+   ========================================================= */
+const $ = id => document.getElementById(id);
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  const el = $(id);
+  el.classList.add('on');
+  el.scrollTop = 0;
+}
+
+function parseEffect(str){
+  const out = {};
+  (str || '').replace(/([a-z])(\d+)/g, (_, k, v) => {
+    out[k] = (out[k] || 0) + parseInt(v, 10);
+    return '';
+  });
+  return out;
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* =========================================================
+   6. 游戏状态
+   ========================================================= */
+let S = null;
+
+function resetState(){
+  S = {
+    i: 0,
+    scores: Object.fromEntries(DIMS.map(d => [d.k, 0])),
+    answers: [],
+    lock: false
+  };
+}
+
+/* =========================================================
+   7. 渲染题目
+   ========================================================= */
+function renderQuestion(){
+  const q = QS[S.i];
+
+  $('hudNum').textContent = String(S.i + 1).padStart(2, '0');
+  $('hudCh').textContent = chapterOf(S.i);
+  $('trackFill').style.width = (S.i / QS.length * 100) + '%';
+  $('qMark').textContent = String(S.i + 1).padStart(2, '0');
+
+  const qt = $('qText');
+  qt.textContent = q.t;
+  qt.style.animation = 'none';
+  void qt.offsetWidth;
+  qt.style.animation = '';
+
+  const box = $('opts');
+  box.innerHTML = '';
+  q.o.forEach((opt, idx) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.style.animationDelay = (idx * 36) + 'ms';
+    b.innerHTML = '<span class="oi">' + String(idx + 1).padStart(2, '0') +
+                  '</span><span class="ot"></span>';
+    b.querySelector('.ot').textContent = opt[0];
+    b.addEventListener('click', () => choose(idx));
+    box.appendChild(b);
+  });
+
+  S.lock = false;
+}
+
+/* =========================================================
+   8. 选择处理
+   ========================================================= */
+function choose(idx){
+  if(S.lock) return;
+  S.lock = true;
+
+  const q = QS[S.i];
+  const btns = Array.from(document.querySelectorAll('.opt'));
+
+  btns.forEach((b, j) => {
+    b.disabled = true;
+    if(j === idx) b.classList.add('sel');
+    else b.classList.add('fade');
+  });
+
+  const eff = parseEffect(q.o[idx][1]);
+  for(const k in eff) S.scores[k] += eff[k];
+
+  S.answers.push(idx);
+
+  // 另一条路
+  const others = q.o.map((_, j) => j).filter(j => j !== idx);
+  const pick = others[Math.floor(Math.random() * others.length)];
+  $('branchText').innerHTML = '你会选择 <em>「' + q.o[pick][0] + '」</em>';
+  $('branch').classList.add('show');
+
+  setTimeout(() => {
+    $('branch').classList.remove('show');
+    S.i++;
+    if(S.i >= QS.length){
+      showResult();
+    } else {
+      renderQuestion();
+      $('gameScreen').scrollTop = 0;
+    }
+  }, 1600);
+}
+
+/* =========================================================
+   9. 雷达图
+   ========================================================= */
+function radarSVG(sc){
+  const n = DIMS.length, cx = 150, cy = 150, R = 100;
+  const max = Math.max(...DIMS.map(d => sc[d.k]), 1);
+
+  let grid = '';
+  for(let ring = 1; ring <= 4; ring++){
+    const r = R * ring / 4;
+    const pts = DIMS.map((_, i) => {
+      const a = -Math.PI / 2 + i * 2 * Math.PI / n;
+      return (cx + r * Math.cos(a)).toFixed(1) + ',' + (cy + r * Math.sin(a)).toFixed(1);
+    }).join(' ');
+    grid += '<polygon points="' + pts + '" fill="none" stroke="rgba(216,178,106,' +
+            (0.06 + ring * 0.028).toFixed(3) + ')" stroke-width="1"/>';
+  }
+
+  let spokes = '';
+  DIMS.forEach((_, i) => {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / n;
+    spokes += '<line x1="' + cx + '" y1="' + cy + '" x2="' +
+      (cx + R * Math.cos(a)).toFixed(1) + '" y2="' +
+      (cy + R * Math.sin(a)).toFixed(1) +
+      '" stroke="rgba(216,178,106,.11)" stroke-width="1"/>';
+  });
+
+  const pts = DIMS.map((d, i) => {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / n;
+    const v = Math.max(sc[d.k] / max, 0.08);
+    return [cx + R * v * Math.cos(a), cy + R * v * Math.sin(a)];
+  });
+
+  const poly = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+
+  let dots = '';
+  pts.forEach((p, i) => {
+    dots += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) +
+            '" r="2.6" fill="' + DIMS[i].color + '"/>';
+  });
+
+  let labels = '';
+  DIMS.forEach((d, i) => {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / n;
+    const lx = cx + (R + 25) * Math.cos(a);
+    const ly = cy + (R + 25) * Math.sin(a);
+    labels += '<text x="' + lx.toFixed(1) + '" y="' + (ly + 4).toFixed(1) +
+      '" text-anchor="middle" font-size="10" fill="#9a9186" letter-spacing="1.4" ' +
+      'font-family="Songti SC, serif">' + d.n + '</text>';
+  });
+
+  return '<svg viewBox="0 0 300 300" class="radar">' +
+    '<defs><radialGradient id="rg" cx="50%" cy="50%" r="50%">' +
+      '<stop offset="0%" stop-color="rgba(216,178,106,.36)"/>' +
+      '<stop offset="100%" stop-color="rgba(216,178,106,.04)"/>' +
+    '</radialGradient></defs>' +
+    grid + spokes +
+    '<polygon points="' + poly + '" fill="url(#rg)" stroke="rgba(240,217,164,.9)" ' +
+      'stroke-width="1.4" stroke-linejoin="round"/>' +
+    dots + labels +
+  '</svg>';
+}
+
+/* =========================================================
+   10. 结果页
+   ========================================================= */
+function showResult(){
+  const entries = DIMS
+    .map(d => ({...d, v: S.scores[d.k]}))
+    .sort((a, b) => b.v - a.v);
+
+  const top = entries[0];
+  const second = entries[1];
+  const max = Math.max(top.v, 1);
+
+  // 副本编号：根据答案生成稳定哈希
+  let h = 0;
+  S.answers.forEach((a, i) => {
+    h = (h * 37 + a * (i + 11) + i * 7) % 1679616;
+  });
+  const code = h.toString(36).toUpperCase().padStart(4, '0');
+
+  // 维度条
+  let dimHTML = '';
+  entries.forEach(d => {
+    dimHTML +=
+      '<div class="dim">' +
+        '<span class="dim-name">' + d.n + '</span>' +
+        '<div class="dim-track"><i data-w="' + Math.round(d.v / max * 100) +
+          '" style="background:linear-gradient(90deg,' + d.color + '55,' + d.color + ')"></i></div>' +
+        '<span class="dim-val">' + d.v + '</span>' +
+      '</div>';
+  });
+
+  // 随机 5 题：你选了 vs 另一条路
+  const pool = shuffle(QS.map((_, i) => i)).slice(0, 5).sort((a, b) => a - b);
+  let altHTML = '';
+  pool.forEach(i => {
+    const q = QS[i];
+    const chosen = S.answers[i];
+    const others = q.o.map((_, j) => j).filter(j => j !== chosen);
+    const alt = others[Math.floor(Math.random() * others.length)];
+    altHTML +=
+      '<div class="alt">' +
+        '<div class="alt-q">第 ' + String(i + 1).padStart(2, '0') + ' 幕 · ' + q.t + '</div>' +
+        '<div class="alt-row"><span class="alt-tag">你选了</span>' +
+          '<span class="alt-a">' + q.o[chosen][0] + '</span></div>' +
+        '<div class="alt-row"><span class="alt-tag">另一条路</span>' +
+          '<span class="alt-b">' + q.o[alt][0] + '</span></div>' +
+      '</div>';
+  });
+
+  const title = TITLES[top.k];
+  const secondLine = SECOND[second.k];
+
+  const html =
+    '<div class="r-head">' +
+      '<div class="r-id">副本编号 &nbsp;<b>No. ' + code + '</b></div>' +
+      '<h2 class="r-title">' + title.t + '</h2>' +
+      '<p class="r-sub">五十个路口走完，你成为了你</p>' +
+    '</div>' +
+
+    '<div class="panel">' +
+      '<div class="panel-label">Your Life Blueprint</div>' +
+      '<div class="radar-box">' + radarSVG(S.scores) + '</div>' +
+      '<div class="dims">' + dimHTML + '</div>' +
+    '</div>' +
+
+    '<div class="panel">' +
+      '<div class="panel-label">If You Had Chosen Otherwise</div>' +
+      '<div class="alt-list">' + altHTML + '</div>' +
+    '</div>' +
+
+    '<div class="letter">' +
+      '<p>你走完了五十个路口。<br>' +
+      '你做出了 <em>五十次选择</em>，也放下了 <em>三百五十种可能</em>。</p>' +
+
+      '<p>' + title.l + '</p>' +
+      '<p>' + secondLine + '</p>' +
+
+      '<p>你以为自己只是在做一个又一个具体的决定：' +
+      '去哪所学校，接哪份工作，爱哪个人，走哪条路。<br>' +
+      '但后来你发现，你其实一直在回答同一个问题——<br>' +
+      '<span class="strong">「我到底想成为什么样的人。」</span></p>' +
+
+      '<p>有些答案，你说得很坚定。<br>' +
+      '有些答案，是咬着牙说出来的。<br>' +
+      '还有些答案，你到现在也没想明白。</p>' +
+
+      '<p>没关系。</p>' +
+
+      '<p>人生不是一道需要被答对的题。<br>' +
+      '它是一份设计草案，永远在改，永远没有终稿。</p>' +
+
+      '<p>你会在某个深夜想起那些没走的副本，想起另一个自己——<br>' +
+      '那个人可能更勇敢，更富有，更自由，也可能更孤独。</p>' +
+
+      '<p>但那个人不是你。</p>' +
+
+      '<p>你之所以是你，不是因为你都选对了，' +
+      '而是因为你选了，然后承担了。<br>' +
+      '你为每一次选择付出的代价，构成了你现在的形状。</p>' +
+
+      '<p>所以，不必回头。</p>' +
+
+      '<p><span class="strong">你现在站的地方，<br>' +
+      '是你走了很久很久，才走到的地方。</span></p>' +
+
+      '<p>而这，已经足够好了。</p>' +
+
+      '<div class="sign">—— 写给正在读这封信的你</div>' +
+    '</div>' +
+
+    '<div class="share">' +
+      '<div class="share-label">Share Your Copy</div>' +
+      '<p>截图你的<b>副本编号 + 称号</b>，发到评论区，<br>' +
+      '看看有多少人和你走在同一条路上。</p>' +
+      '<div class="share-card">' +
+        '<div class="sc-id">NO. ' + code + '</div>' +
+        '<div class="sc-title">' + title.t + '</div>' +
+      '</div><br>' +
+      '<button class="copy-btn" id="copyBtn">复制我的副本文案</button>' +
+      '<div class="copy-tip" id="copyTip"></div>' +
+    '</div>' +
+
+    '<button class="btn r-btn" id="restartBtn">重启人生</button>';
+
+  $('resultWrap').innerHTML = html;
+  showScreen('resultScreen');
+
+  // 维度条动画
+  setTimeout(() => {
+    document.querySelectorAll('.dim-track i').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 420);
+
+  // 复制文案
+  const shareText = '我在《人生副本》里走到了 No.' + code + ' · ' + title.t +
+                    '。你呢？';
+  $('copyBtn').addEventListener('click', () => {
+    const done = () => {
+      $('copyTip').textContent = '已复制，去评论区粘贴吧';
+      setTimeout(() => { $('copyTip').textContent = ''; }, 2600);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(shareText).then(done).catch(() => fallbackCopy(shareText, done));
+    } else {
+      fallbackCopy(shareText, done);
+    }
+  });
+
+  $('restartBtn').addEventListener('click', restart);
+}
+
+function fallbackCopy(text, cb){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); cb(); } catch(e){}
+  document.body.removeChild(ta);
+}
+
+/* =========================================================
+   11. 开始 / 重启
+   ========================================================= */
+function startGame(){
+  resetState();
+  $('branch').classList.remove('show');
+  showScreen('gameScreen');
+  renderQuestion();
+}
+
+function restart(){
+  $('branch').classList.remove('show');
+  $('resultWrap').innerHTML = '';
+  resetState();
+  showScreen('coverScreen');
+}
+
+$('startBtn').addEventListener('click', startGame);
+
+/* 键盘 1-8 快速选择 */
+document.addEventListener('keydown', e => {
+  if(!$('gameScreen').classList.contains('on')) return;
+  const n = parseInt(e.key, 10);
+  if(n >= 1 && n <= 8){
+    const btns = document.querySelectorAll('.opt');
+    if(btns[n - 1] && !btns[n - 1].disabled) btns[n - 1].click();
+  }
+});
+</script>
+</body>
+</html>
